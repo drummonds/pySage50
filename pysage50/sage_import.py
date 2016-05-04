@@ -63,20 +63,21 @@ class SageImport:
                   exchange_rate=1, extra_ref='', user_name = '', comment = ''):
         if user_name == '':
             user_name = self.user
-        self.f.write(tran_type + ', ')
-        self.f.write(account + ', ')
-        self.f.write(nominal + ', ')
-        self.f.write(dt.datetime.strftime(date, '%d/%m/%Y')+', ')
-        self.f.write(reference + ', ')
-        self.f.write(details + ', ')
-        self.f.write('{0:.2f}'.format(net_amount) + ', ')
-        self.f.write(tax_code + ', ')
-        self.f.write('{0:.2f}'.format(tax_amount)+', ') # Tax amount
-        self.f.write('{0:.2f}'.format(exchange_rate)+', ')
-        self.f.write(extra_ref+', ')
+        # Don't be tempted to put spaces after comma's. SAGE WILL REJECT IT.
+        self.f.write(tran_type + ',')
+        self.f.write(account + ',')
+        self.f.write(nominal + ',')
+        self.f.write(dt.datetime.strftime(date, '%d/%m/%Y')+',')
+        self.f.write(reference + ',')
+        self.f.write(details + ',')
+        self.f.write('{0:.2f}'.format(net_amount) + ',')
+        self.f.write(tax_code + ',')
+        self.f.write('{0:.2f}'.format(tax_amount)+',') # Tax amount
+        self.f.write('{0:.2f}'.format(exchange_rate)+',')
+        self.f.write(extra_ref+',')
         self.f.write(user_name)
         if comment != '':
-            self.f.write(', '+comment)
+            self.f.write(','+comment)
         self.f.write('\n')
 
     # def stopnote_check_write_row(self, tran_type, nominal,reference,
