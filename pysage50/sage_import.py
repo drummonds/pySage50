@@ -124,5 +124,9 @@ class SageImport:
         return filename
 
     def close_file(self):
-        self.f.close() # you can omit in most cases as the destructor will call if
+        try:
+            self.f.close() # you can omit in most cases as the destructor will call if
+        except AttributeError:  # Asuming can't find f as have failed earlier eg file already exists.
+            pass
+
 
