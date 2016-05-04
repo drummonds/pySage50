@@ -15,4 +15,9 @@ This does not cope with foreign currency transactions.  Some of these will be ac
 but then you will have a mess.
 
 
+### Installing a module locally
+An aide memoire for me You need a command line like this:
+'pip install git+file://C:/it/majorprojects/pySage50'
+
+
 
