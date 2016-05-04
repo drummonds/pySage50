@@ -1,0 +1,14 @@
+# ignore compile python files,
+*.pyc
+# ignore ipython notebook files
+.ipynb_checkpoints/
+# ignore generated report files
+Management*.xlsx
+*Import.csv
+*.last
+# ignore temporary files
+~*
+# ignore Pycharm files (Each user may not have the same installation
+.idea/
+
+
