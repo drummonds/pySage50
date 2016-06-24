@@ -1,9 +1,13 @@
 # pySage50
-Python Sage 50 tools
+Python interface Sage Line 50 Accountancy
 
 This is a collection of tools that I have used for helping my day to day work with Sage 50.  The
 first group is a collection of tools to make it easier to generate Sage Import files.
 It is currently Windows Only as there is a link to an ODBC connection.
+
+There are two parts:
+- A wrapper to create import files
+- A wrapper for connection to the ODBC files.
 
 # Sage Import files
 
