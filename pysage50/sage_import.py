@@ -83,7 +83,7 @@ class SageImport:
     # def stopnote_check_write_row(self, tran_type, nominal,reference,
     #               date, details, net_amount,
     #               tax_code, account='', tax_amount=0.0,
-    #               exchange_rate=1, extra_ref='', user_name = 'H3', comment = '', stop_note = ''):
+    #               exchange_rate=1, extra_ref='', user_name = 'Computer', comment = '', stop_note = ''):
     #     r = self.check_accruals_for_stop_note(stop_note)
     #     if r[0]:
     #         #Error There are transactions when there should be none
@@ -100,7 +100,7 @@ class SageImport:
     # # def check_write_row(self, tran_type, nominal,reference,
     #               date, details, net_amount,
     #               tax_code, account='', tax_amount=0.0,
-    #               exchange_rate=1, extra_ref='', user_name = 'H3', comment = ''):
+    #               exchange_rate=1, extra_ref='', user_name = 'Computer', comment = ''):
     #     r = self.check_for_transactions_on_this_day(tran_type, nominal)
     #     if r[0]:
     #         #Error There are transactions when there should be none

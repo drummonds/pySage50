@@ -14,6 +14,7 @@ class TestSageImport(unittest.TestCase):
     def test_simple_SageImport(self):
         # Todo code test code will fail if run on the end of day so file generated on one day
         # and tested on the next
+        filename = ''
         try:
             date = dt.datetime.now()
             nominal_code = '4009'
@@ -22,7 +23,7 @@ class TestSageImport(unittest.TestCase):
             filename = si.start_file('TestSage')
             si.write_row('JD', si.default_bank, 'Discount', date,
                          'CN Discount for Ord42', value, 'T9')
-            si.write_row('JC', '4009', 'Discount', date,
+            si.write_row('JC', '0021', 'Discount', date,
                          'CN Discount for Ord42', value, 'T9')
             si.close_file()
             assert os.path.isfile(filename)

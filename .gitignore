@@ -5,10 +5,17 @@
 # ignore generated report files
 Management*.xlsx
 *Import.csv
+
+# ignore temporary log files that are created during testing.
 *.last
+
 # ignore temporary files
 ~*
+
 # ignore Pycharm files (Each user may not have the same installation
 .idea/
+
+# Ignore .env configuration files
+.env
 
 
