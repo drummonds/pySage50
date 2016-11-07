@@ -62,16 +62,15 @@ def get_dataframe_sage_odbc_query(sql, name):
         # Read fresh data from sage
         # Update files
         df.to_json(json_file_name)
-        # Need to fix those records that are integer but normally stored as strings.  On memoization theses are
-        # converted to integers so now need to be converted back to strings to be compatible
-        for fn in ['ACCOUNT_REF', 'INV_REF']:
-            df[fn] = df[fn].map(str)
         data = {'max_transaction_stored': max_transaction_in_sage}
         with open(json_check_file_name, 'w') as f:
             json.dump(data, f)
     else:  # read memoised data
         df = pd.read_json(json_file_name)
-
+        # Need to fix those records that are integer but normally stored as strings.  On memoization theses are
+        # converted to integers so now need to be converted back to strings to be compatible
+        for fn in ['ACCOUNT_REF', 'INV_REF']:
+            df[fn] = df[fn].astype('str')
     return df
 
 

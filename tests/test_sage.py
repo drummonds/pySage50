@@ -26,7 +26,9 @@ class SageTestCase(TestCase):
 
     def invoice_assertions(self, sage):
         for fn in ['ACCOUNT_REF', 'INV_REF']:
-            self.assertTrue(isinstance(sage.sqldata[fn][0], str), 'Type of {} should be string'.format(fn))
+            self.assertTrue(isinstance(sage.sqldata[fn][0], str),
+                            'Type of {} should be string is {}'.format(fn,
+                                                                       type(sage.sqldata[fn][0])))
         self.assertEqual('X322', sage.using_invoice_get(57735, 'ALT_REF'))
         self.assertEqual(Decimal('822.84'), sage.using_invoice_get(57735, 'AMOUNT'))
         self.assertEqual('X322', sage.using_invoice_get('57735', 'ALT_REF'))
