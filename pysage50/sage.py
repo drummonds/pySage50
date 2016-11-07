@@ -11,6 +11,8 @@ import pandas as pd
 import pyodbc
 import os
 
+from dotenv import load_dotenv, find_dotenv
+
 from luca import p
 
 
@@ -18,6 +20,9 @@ class PySageError(Exception):
     pass
 
 def get_default_connection_string():
+    # Make sure environment variables loaded.
+    env = find_dotenv()
+    load_dotenv(env)
     try:
         try:
             # Python 2
@@ -26,7 +31,8 @@ def get_default_connection_string():
             # Python 3
             connection_string = os.environ['PYSAGE_CNXN']
     except KeyError:
-        raise PySageError('Environment missing PYSAGE_CNXN setting')
+        raise PySageError('Environment missing PYSAGE_CNXN setting. '
+            + 'Check for .env file looked here {}'.format(env))
     return connection_string
 
 
