@@ -57,13 +57,15 @@ def get_dataframe_sage_odbc_query(sql, name):
     except (FileNotFoundError, ValueError):  # Triggered as open nonexistent file is ok but no data
         max_transaction_stored = 0
     max_transaction_in_sage = get_max_transaction_in_sage(cnxn)
-    print('max transaction stored, sage = {}, {}'.format(max_transaction_stored,
-                                                         max_transaction_in_sage))
     if max_transaction_stored == 0 or max_transaction_stored != max_transaction_in_sage:
         df = pd.read_sql(sage_all_data, cnxn)
         # Read fresh data from sage
         # Update files
         df.to_json(json_file_name)
+        # Need to fix those records that are integer but normally stored as strings.  On memoization theses are
+        # converted to integers so now need to be converted back to strings to be compatible
+        for fn in ['ACCOUNT_REF', 'INV_REF']:
+            df[fn] = df[fn].map(str)
         data = {'max_transaction_stored': max_transaction_in_sage}
         with open(json_check_file_name, 'w') as f:
             json.dump(data, f)
@@ -75,7 +77,7 @@ def get_dataframe_sage_odbc_query(sql, name):
 
 sage_all_data = """
 SELECT
-    aj.TRAN_NUMBER, aj.type, aj.DATE, nl.account_ref, aj.ACCOUNT_REF as ALT_REF, aj.INV_REF, aj.DETAILS, AJ.TAX_CODE,
+    aj.TRAN_NUMBER, aj.TYPE, aj.DATE, nl.ACCOUNT_REF, aj.ACCOUNT_REF as ALT_REF, aj.INV_REF, aj.DETAILS, AJ.TAX_CODE,
     aj.AMOUNT, aj.FOREIGN_AMOUNT, aj.BANK_FLAG, ah.DATE_BANK_RECONCILED, aj.EXTRA_REF
 FROM
 NOMINAL_LEDGER nl, AUDIT_HEADER ah
@@ -86,32 +88,38 @@ aj.DATE > '2000-01-01' AND aj.DELETED_FLAG = 0
 """
 
 
-class Sage():
+class Sage:
     """Interface to SAGE line 50 account system.
     """
     def  __init__(self, connection_string=''):
         if connection_string == '':
             connection_string = get_default_connection_string()
-        sqldata = get_dataframe_sage_odbc_query(sage_all_data, 'SageODBC')
+        self.sqldata = get_dataframe_sage_odbc_query(sage_all_data, 'SageODBC')
         if self.sqldata['DATE'].dtype == np.object:
             self.sqldata['DATE'] = self.sqldata['DATE'].astype('datetime64')
 
-    def using_invoice_get(self, i, field):
+    def using_invoice_get(self, i, field, numchars=30):
         """
-        Using the invoice number we can look up the field.  The accounting database contains line entries
+                Using the invoice number we can look up the field.  The accounting database contains line entries.
+                So this aggregates the line entries and returns the sum of the field if numeric.
         """
         df = self.sqldata[(self.sqldata['TYPE'] == 'SI')
-                & (self.sqldata['INV_REF'].str.contains(str(i)))
-                ]
-        result = ''
-        if len(df) == 1: # Have found some line entries for this invoice reference
-            return df.iloc[0][field]
+                          & (self.sqldata['ACCOUNT_REF'] == '1100')
+                          & (self.sqldata['INV_REF'].str.contains(str(i)))
+                          ]
+        if len(df) == 0:  # It is an error to look up data where their is none
+            raise PySageError('No data found in Audit Header to match invoice {}'.format(i))
+        elif field == 'TRAN_NUMBER':
+            return list(df[:1][field])[0]
+        elif field in ['DATE', 'TYPE', 'ACCOUNT_REF', 'ALT_REF', 'INV_REF', 'TAX_CODE',
+                       'BANK_FLAG', 'DATE_BANK_RECONCILED']:
+            return list(df[field])[0]
+        elif field in ['AMOUNT', 'FOREIGN_AMOUNT', 'NET_AMOUNT']:
+            return p(df[field].sum())
+        elif field in ['DETAILS', 'EXTRA_REF']:
+            return df[field].str.cat()[:numchars]
         else:
-            if len(df) == 0:
-                raise PySageError('No data found in Audit Header to match invoice {}'.format(i))
-            else:
-                print(df)
-                raise PySageError('Multiple ({}) records found in Audit Header to match invoice {}'.format(len(df), i))
+            raise PySageError('Unmatched get field {} for using_invoice_get '.format(field))
 
     def get_field(self, row, field):
         """ For use in a lambda
