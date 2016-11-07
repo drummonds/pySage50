@@ -119,8 +119,28 @@ class Sage:
         elif field in ['DATE', 'TYPE', 'ACCOUNT_REF', 'ALT_REF', 'INV_REF', 'TAX_CODE',
                        'BANK_FLAG', 'DATE_BANK_RECONCILED']:
             return list(df[field])[0]
-        elif field in ['AMOUNT', 'FOREIGN_AMOUNT', 'NET_AMOUNT']:
+        elif field in ['AMOUNT', 'FOREIGN_AMOUNT']:
             return p(df[field].sum())
+        elif field == 'GROSS_AMOUNT':
+            return p(df['AMOUNT'].sum())
+        elif field in ['NET_AMOUNT']:
+            df2 = self.sqldata[(self.sqldata['TYPE'] == 'SI')
+                              & (self.sqldata['ACCOUNT_REF'] == '2200') # Get VAT control account
+                              & (self.sqldata['INV_REF'].str.contains(str(i)))
+                              ]
+            return p(df['AMOUNT'].sum() + df2['AMOUNT'].sum())
+        elif field in ['TAX_AMOUNT']:
+            df2 = self.sqldata[(self.sqldata['TYPE'] == 'SI')
+                               & (self.sqldata['ACCOUNT_REF'] == '2200')  # Get VAT control account
+                               & (self.sqldata['INV_REF'].str.contains(str(i)))
+                               ]
+            return p(- df2['AMOUNT'].sum())
+        elif field in ['TAX_RATE']:
+            df2 = self.sqldata[(self.sqldata['TYPE'] == 'SI')
+                               & (self.sqldata['ACCOUNT_REF'] == '4000')  # Get net Sales amount
+                               & (self.sqldata['INV_REF'].str.contains(str(i)))
+                               ]
+            return 100 * ((float(df['AMOUNT'].sum()) / float(- df2['AMOUNT'].sum())) - 1.0)
         elif field in ['DETAILS', 'EXTRA_REF']:
             return df[field].str.cat()[:numchars]
         else:
@@ -138,6 +158,11 @@ class Sage:
 
     def enrich_remittance_doc(self, remittance_doc):
         """Enrich a raw remittance document with data from Sage
+        Remittance doc has a field df which defines all the remittances
+        It uses getField which uses 3 predefined columns:
+            'Your Ref'  is our invoice number
+            'Member Code' is an AIS specfic membership code and defines some exceptions
+            'Document Type' defines the type of document.  We are only enriching 'Invoice' and 'Credit Note'
         """
         def get_series(field):
             return remittance_doc.df.apply(lambda row: self.get_field(row, field), axis=1)
