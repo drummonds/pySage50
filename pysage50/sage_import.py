@@ -115,14 +115,16 @@ class SageImport:
     #               exchange_rate=exchange_rate, extra_ref=extra_ref, user_name = user_name, comment = comment)
 
     def start_file(self, name):
-        filename = self.home_directory + SageImport.today_as_string() + ' ' + name + ' Import.csv'
-        if os.path.isfile(filename):
-            raise SageImportError('File already exists.  Should probably delete and try again.  File is {}.'.format(filename))
-        self.f = open(filename,'w')
+        self.filename = self.home_directory + SageImport.today_as_string() + ' ' + name + ' Import.csv'
+        if os.path.isfile(self.filename):
+            raise SageImportError('File already exists.  Should probably delete and try again.  File is {}.'.
+                                  format(self.filename))
+        self.f = open(self.filename,'w')
         #Write header row
-        self.f.write('Type,Account Reference,Nominal A/C Ref,Date,Reference,Details,Net Amount,Tax Code,Tax Amount,Exchange Rate,Extra Reference,User Name')
+        self.f.write('Type,Account Reference,Nominal A/C Ref,Date,Reference,Details,Net Amount,Tax Code,'
+            + 'Tax Amount,Exchange Rate,Extra Reference,User Name')
         self.f.write('\n')
-        return filename
+        return self.filename
 
     def close_file(self):
         try:
