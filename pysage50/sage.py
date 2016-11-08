@@ -165,7 +165,7 @@ class Sage:
         def get_series(field):
             return remittance_doc.df.apply(lambda row: self.get_field(row, field), axis=1)
 
-        remittance_doc.df['Account_Ref'] = get_series('ACCOUNT_REF')
+        remittance_doc.df['Account_Ref'] = get_series('ALT_REF')
         remittance_doc.df['Sage_Net_Amount'] = get_series('NET_AMOUNT')
         remittance_doc.df['Sage_Gross_Amount'] = get_series('GROSS_AMOUNT')
         remittance_doc.df['Sage_VAT_Amount'] = get_series('TAX_AMOUNT')

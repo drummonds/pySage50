@@ -34,10 +34,11 @@ class SageTestCase(TestCase):
         sage = Sage()
         trd = TestRemittanceDoc();
         sage.enrich_remittance_doc(trd)
-        assert(trd.df['Sage_Gross_Amount'][0] ==  (trd.df['Sage_VAT_Amount'][0]
+        self.assertEqual(trd.df['Sage_Gross_Amount'][0], (trd.df['Sage_VAT_Amount'][0]
                                                    + trd.df['Sage_Net_Amount'][0]))
-        assert(trd.df['Sage_Gross_Amount'][0] ==  (trd.df['Sage_VAT_Amount'][0]
+        self.assertEqual(trd.df['Sage_Gross_Amount'][0], (trd.df['Sage_VAT_Amount'][0]
                                                    + trd.df['Sage_Net_Amount'][0]))
+        self.assertEqual(trd.df['Account_Ref'][0], 'X322')
         self.assertIsNone(trd.df['Sage_Gross_Amount'][1], 'AIS own member code so ignored')
         self.assertIsNone(trd.df['Sage_Gross_Amount'][2], 'Not an invoice so ignored')
         print(trd.df)
