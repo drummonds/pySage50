@@ -99,16 +99,16 @@ class Sage:
         if self.sqldata['DATE'].dtype == np.object:
             self.sqldata['DATE'] = self.sqldata['DATE'].astype('datetime64')
 
-    def using_invoice_get(self, i, field, numchars=30):
+    def using_reference_get(self, i, field, numchars=30, record_type = ['SI']):
         """
                 Using the invoice number we can look up the field.  The accounting database contains line entries.
                 So this aggregates the line entries and returns the sum of the field if numeric.
         """
-        df = self.sqldata[(self.sqldata['TYPE'] == 'SI')
+        df = self.sqldata[(self.sqldata['TYPE'].isin(record_type))
                           & (self.sqldata['ACCOUNT_REF'] == '1100')
-                          & (self.sqldata['INV_REF'].str.contains(str(i)))
+                          & (self.sqldata['INV_REF'] == str(i))
                           ]
-        if len(df) == 0:  # It is an error to look up data where their is none
+        if len(df) == 0:  # It is an error to look up data where there is none
             raise PySageError('No data found in Audit Header to match invoice {}'.format(i))
         elif field == 'TRAN_NUMBER':
             return list(df[:1][field])[0]
@@ -120,21 +120,21 @@ class Sage:
         elif field == 'GROSS_AMOUNT':
             return p(df['AMOUNT'].sum())
         elif field in ['NET_AMOUNT']:
-            df2 = self.sqldata[(self.sqldata['TYPE'] == 'SI')
+            df2 = self.sqldata[(self.sqldata['TYPE'].isin(record_type))
                               & (self.sqldata['ACCOUNT_REF'] == '2200') # Get VAT control account
-                              & (self.sqldata['INV_REF'].str.contains(str(i)))
+                              & (self.sqldata['INV_REF']== str(i))
                               ]
             return p(df['AMOUNT'].sum() + df2['AMOUNT'].sum())
         elif field in ['TAX_AMOUNT']:
-            df2 = self.sqldata[(self.sqldata['TYPE'] == 'SI')
+            df2 = self.sqldata[(self.sqldata['TYPE'].isin(record_type))
                                & (self.sqldata['ACCOUNT_REF'] == '2200')  # Get VAT control account
-                               & (self.sqldata['INV_REF'].str.contains(str(i)))
+                               & (self.sqldata['INV_REF']== str(i))
                                ]
             return p(- df2['AMOUNT'].sum())
         elif field in ['TAX_RATE']:
-            df2 = self.sqldata[(self.sqldata['TYPE'] == 'SI')
+            df2 = self.sqldata[(self.sqldata['TYPE'].isin(record_type))
                                & (self.sqldata['ACCOUNT_REF'] == '4000')  # Get net Sales amount
-                               & (self.sqldata['INV_REF'].str.contains(str(i)))
+                               & (self.sqldata['INV_REF']== str(i))
                                ]
             return 100 * ((float(df['AMOUNT'].sum()) / float(- df2['AMOUNT'].sum())) - 1.0)
         elif field in ['DETAILS', 'EXTRA_REF']:
@@ -148,8 +148,10 @@ class Sage:
         """
         result = None
         if row['Member Code'] not in ('4552', '4424'):  # TODO Ignore enrichment for AIS discount and AIS invoices
-            if row['Document Type'] in ('Invoice', 'Credit Note',):
-                result = self.using_invoice_get(row['Your Ref'], field)
+            if row['Document Type'] in ('Invoice',):
+                result = self.using_reference_get(row['Your Ref'], field, record_type=['SI'])
+            if row['Document Type'] in ('Credit Note',):
+                result = self.using_reference_get(row['Your Ref'], field, record_type=['SC'])
         return result
 
     def enrich_remittance_doc(self, remittance_doc):
