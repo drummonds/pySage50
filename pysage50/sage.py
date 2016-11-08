@@ -11,8 +11,6 @@ import pandas as pd
 import pyodbc
 import os
 
-from dotenv import load_dotenv, find_dotenv
-
 from luca import p
 
 
@@ -21,8 +19,6 @@ class PySageError(Exception):
 
 def get_default_connection_string():
     # Make sure environment variables loaded.
-    env = find_dotenv()
-    load_dotenv(env)
     try:
         try:
             # Python 2
