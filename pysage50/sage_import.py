@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+from unipath import Path
 
 class SageImportError(Exception):
     pass
@@ -115,7 +116,7 @@ class SageImport:
     #               exchange_rate=exchange_rate, extra_ref=extra_ref, user_name = user_name, comment = comment)
 
     def start_file(self, name):
-        self.filename = self.home_directory + SageImport.today_as_string() + ' ' + name + ' Import.csv'
+        self.filename = Path(self.home_directory).child(SageImport.today_as_string() + ' ' + name + ' Import.csv')
         if os.path.isfile(self.filename):
             raise SageImportError('File already exists.  Should probably delete and try again.  File is {}.'.
                                   format(self.filename))
