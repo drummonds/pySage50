@@ -5,6 +5,7 @@ from unipath import Path
 class SageImportError(Exception):
     pass
 
+from .sage import Sage
 
 class SageImport:
 
@@ -20,25 +21,26 @@ class SageImport:
         self.default_bank = default_bank
         self.date = SageImport.today_as_string()
 
-    # TODO Create Sage ODBC entry and interface
-    #  Need link to persistent Sage object perhaps singleton
-    # def check_for_transactions_on_this_day(self, tran_type, account):
-    #     test3 = sqldata[sqldata['TYPE'] == tran_type]
-    #     test2 = test3[test3['ALT_REF'] == account]
-    #     test = test2[test2['DATE'] == self.tran_date]
-    #     l = len(test)
-    #     if l == 0:
-    #         comment = 'Found no transactions on {} .'.format(
-    #             self.tran_date.strftime('%Y-%m-%d'), )
-    #         return (False, 0, comment)
-    #     else:
-    #         tn = test[:1]
-    #         comment = 'Found {} transactions on {}. First was on {}: details {}: for {}.'.format(
-    #             l, self.tran_date.strftime('%Y-%m-%d'),
-    #             list(tn['DATE'])[0].strftime('%Y-%m-%d'),
-    #             list(tn['DETAILS'])[0],
-    #             list(tn['AMOUNT'])[0],)
-    #         return (True, 0, comment)
+    def check_for_transactions_on_this_day(self, tran_type, account, tran_date):
+        if not hasattr(self, 'sage'):
+            self.sage = Sage()
+        sqldata = self.sage.sqldata
+        test3 = sqldata[sqldata['TYPE'] == tran_type]
+        test2 = test3[test3['ALT_REF'] == account]
+        test = test2[test2['DATE'] == tran_date]
+        l = len(test)
+        if l == 0:
+            comment = 'Found no transactions on {} .'.format(
+                tran_date.strftime('%Y-%m-%d'), )
+            return (False, 0, comment)
+        else:
+            tn = test[:1]
+            comment = 'Found {} transactions on {}. First was on {}: details {}: for {}.'.format(
+                l, tran_date.strftime('%Y-%m-%d'),
+                list(tn['DATE'])[0].strftime('%Y-%m-%d'),
+                list(tn['DETAILS'])[0],
+                list(tn['AMOUNT'])[0],)
+            return (True, 0, comment)
 
     # Row functions
 
@@ -65,22 +67,22 @@ class SageImport:
             self.f.write(','+comment)
         self.f.write('\n')
 
-    # # def check_write_row(self, tran_type, nominal,reference,
-    #               date, details, net_amount,
-    #               tax_code, account='', tax_amount=0.0,
-    #               exchange_rate=1, extra_ref='', user_name = 'Computer', comment = ''):
-    #     r = self.check_for_transactions_on_this_day(tran_type, nominal)
-    #     if r[0]:
-    #         #Error There are transactions when there should be none
-    #         self.ran_ok = False
-    #         tran_type = 'xx'+tran_type
-    #         comment = comment + ' ' + r[2]
-    #     else:
-    #         comment = comment + ' :Checked '+ r[2]
-    #     self.write_row(tran_type, nominal,reference,
-    #               date, details, net_amount,
-    #               tax_code, account=account, tax_amount=tax_amount,
-    #               exchange_rate=exchange_rate, extra_ref=extra_ref, user_name = user_name, comment = comment)
+    def check_write_row(self, tran_type, nominal,reference,
+                  date, details, net_amount,
+                  tax_code, account='', tax_amount=0.0,
+                  exchange_rate=1, extra_ref='', user_name = 'Computer', comment = ''):
+        r = self.check_for_transactions_on_this_day(tran_type, nominal, date)
+        if r[0]:
+            #Error There are transactions when there should be none
+            self.ran_ok = False
+            tran_type = 'xx'+tran_type
+            comment = comment + ' ' + r[2]
+        else:
+            comment = comment + ' :Checked '+ r[2]
+        self.write_row(tran_type, nominal,reference,
+                  date, details, net_amount,
+                  tax_code, account=account, tax_amount=tax_amount,
+                  exchange_rate=exchange_rate, extra_ref=extra_ref, user_name = user_name, comment = comment)
 
     def start_file(self, name):
         self.filename = Path(self.home_directory).child(SageImport.today_as_string() + ' ' + name + ' Import.csv')
@@ -97,9 +99,6 @@ class SageImport:
         return self.filename
 
     def close_file(self):
-        try:
-            self.f.close() # you can omit in most cases as the destructor will call if
-        except AttributeError:  # Asuming can't find f as have failed earlier eg file already exists.
-            pass
+        self.f.close() # you can omit in most cases as the destructor will call if
 
 

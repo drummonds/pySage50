@@ -49,3 +49,11 @@ class SageTestCase(TestCase):
         # This should work with memoized files and so should the assertions
         sage2 = Sage()
         self.invoice_assertions(sage2)
+
+    def test_sage_singleton(self):
+        # Check that the singleton pattern is being used.
+        self.clean_up()
+        sage1 = Sage()
+        sage2 = Sage()
+        self.assertTrue(sage1 is sage2)
+

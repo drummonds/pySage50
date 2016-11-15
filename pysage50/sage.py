@@ -11,11 +11,14 @@ import pandas as pd
 import pyodbc
 import os
 
+from dotenv import load_dotenv, find_dotenv
+
 from luca import p
 
 
 class PySageError(Exception):
     pass
+
 
 def get_default_connection_string():
     # Make sure environment variables loaded.
@@ -28,7 +31,7 @@ def get_default_connection_string():
             connection_string = os.environ['PYSAGE_CNXN']
     except KeyError:
         raise PySageError('Environment missing PYSAGE_CNXN setting. '
-            + 'Check for .env file looked here {}'.format(env))
+            + 'Check for .env file looked here ??')
     return connection_string
 
 
@@ -89,10 +92,20 @@ aj.DATE > '2000-01-01' AND aj.DELETED_FLAG = 0
 """
 
 
-class Sage:
+class Singleton(type):
+    instance = None
+
+    def __call__(cls, *args, **kw):
+        if not cls.instance:
+            cls.instance = super(Singleton, cls).__call__(*args, **kw)
+        return cls.instance
+
+
+class Sage(metaclass=Singleton):
     """Interface to SAGE line 50 account system.
     """
     def  __init__(self, connection_string=''):
+        load_dotenv(find_dotenv())
         if connection_string == '':
             connection_string = get_default_connection_string()
         self.sqldata = get_dataframe_sage_odbc_query(sage_all_data, 'SageODBC')
