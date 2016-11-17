@@ -49,9 +49,9 @@ Run Sage and open Slumberfleece current.
 
 # Roadmap
 
-Add the json version of the sage database so as to be able to get data from either a saved json version or directly
-from the database.  This can make the testing more realistic and less system dependent.
-
+- Always use the cached data version here and split off the actual DB
+component to a seperate project PySage50DB which will include the
+specific version of python needed to talk to the ODBC connection.
 
 
 

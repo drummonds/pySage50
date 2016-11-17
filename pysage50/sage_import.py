@@ -84,6 +84,24 @@ class SageImport:
                   tax_code, account=account, tax_amount=tax_amount,
                   exchange_rate=exchange_rate, extra_ref=extra_ref, user_name = user_name, comment = comment)
 
+    def detailed_check_write_row(self, tran_type, nominal,reference,
+                  date, details, net_amount,
+                  tax_code, account='', tax_amount=0.0,
+                  exchange_rate=1, extra_ref='', user_name = 'H3', comment = ''):
+        # Detailed check where check for the exact reference and account.  This will prevent duplication
+        r = self.detailed_check_for_transactions_in_the_month(tran_type, nominal, date, details)
+        if r[0]:
+            #Error There are transactions when there should be none
+            self.ran_ok = False
+            tran_type = 'xx'+tran_type
+            comment = comment + ' ' + r[2]
+        else:
+            comment = comment + ' :Checked '+ r[2]
+        self.write_row(tran_type, nominal,reference,
+                  date, details, net_amount,
+                  tax_code, account=account, tax_amount=tax_amount,
+                  exchange_rate=exchange_rate, extra_ref=extra_ref, user_name = user_name, comment = comment)
+
     def start_file(self, name):
         self.filename = Path(self.home_directory).child(SageImport.today_as_string() + ' ' + name + ' Import.csv')
         if os.path.isfile(self.filename):
