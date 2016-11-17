@@ -7,7 +7,7 @@ Information describing the project.
 package = 'pysage50'
 project = "Python Sage 50 tools"
 project_no_spaces = project.replace(' ', '')
-version = '0.0.16'
+version = '0.0.17'
 description = 'A pythonic interface to Sage Line 50.'
 authors = ['drummonds']
 authors_string = ', '.join(authors)

@@ -102,6 +102,11 @@ class SageImport:
                   tax_code, account=account, tax_amount=tax_amount,
                   exchange_rate=exchange_rate, extra_ref=extra_ref, user_name = user_name, comment = comment)
 
+    def write_error_row(self, message):
+        """This allows error message to written out so that the user can work out how to correct the file.
+        The error message means that the file is no long correct.  So none of the entries will be imported"""
+        self.f.write(message)
+
     def start_file(self, name):
         self.filename = Path(self.home_directory).child(SageImport.today_as_string() + ' ' + name + ' Import.csv')
         if os.path.isfile(self.filename):
