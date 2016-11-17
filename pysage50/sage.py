@@ -202,3 +202,70 @@ class Sage(metaclass=Singleton):
                 gross_sum_ex_discount, gross, type(gross_sum_ex_discount), type(gross)
             ))
         # The internal sum has already been done.  It is not until the next stage that we calculate discounts
+
+    def check_for_transactions_in_the_month(self, journal_type, account, date):
+        # c = 'Type of date {} account = {}  Type of account {} journal type = {}'.format(type(date), account,
+        #     type(account), journal_type)
+        # return (True, 0, c)
+        # d2 = pd.to_datetime(date, format='%d/%m/%Y')
+        # d2 = dt.datetime(2014,12,15)
+        en = date +  pd.offsets.MonthEnd(0)
+        st = en -  pd.offsets.MonthBegin(1)
+        # test = self.data[(self.data['ACCOUNT_REF'] == account) & (self.data['DATE'] >= st) & (self.data['DATE'] < en)]
+        test2 = self.data[self.data['ACCOUNT_REF'] == int(account)]
+        test1 = test2[self.data['DATE'] >= st]
+        test = test1[self.data['DATE'] <= en]
+        l = len(test)
+        if l == 0:
+            comment = 'Found no transactions from {} upto {} (type of start = {}).'.format(
+                st.strftime('%Y-%m-%d'), en.strftime('%Y-%m-%d'), type(st), )
+            return (False, 0, comment)
+        else:
+            tn = test[:1]
+            comment = 'Found {} transactions from {} upto {}. First was on {}: details {}: for {}.'.format(
+                l, st.strftime('%Y-%m-%d'), en.strftime('%Y-%m-%d'),
+                list(tn['DATE'])[0].strftime('%Y-%m-%d'),
+                list(tn['DETAILS'])[0],
+                list(tn['AMOUNT'])[0],)
+            return (True, 0, comment)
+
+    def detailed_check_for_transactions_in_the_month(self, journal_type, account, date, details):
+        en = date +  pd.offsets.MonthEnd(0)
+        st = en -  pd.offsets.MonthBegin(1)
+        #test = self.data[(self.data['ACCOUNT_REF'] == account) & (self.data['DATE'] >= st) & (self.data['DATE'] < en)]
+        test1 = self.data[self.data['ACCOUNT_REF'] == int(account)]
+        test2 = test1[self.data['DATE'] >= st]
+        test3 = test2[self.data['DATE'] <= en]
+        test = test3[self.data['DETAILS'] == details] # Exact match is ok since looking for machine duplicates
+        l = len(test)
+        if l == 0:
+            comment = 'Found no transactions from {} upto {} (type of start = {}).'.format(
+                st.strftime('%Y-%m-%d'), en.strftime('%Y-%m-%d'), type(st), )
+            return (False, 0, comment)
+        else:
+            tn = test[:1]
+            comment = 'Found {} transactions from {} upto {}. First was on {}: details {}: for {}.'.format(
+                l, st.strftime('%Y-%m-%d'), en.strftime('%Y-%m-%d'),
+                list(tn['DATE'])[0].strftime('%Y-%m-%d'),
+                list(tn['DETAILS'])[0],
+                list(tn['AMOUNT'])[0],)
+            return (True, 0, comment)
+
+    def check_for_transactions_on_this_day(self, tran_type, account, tran_date):
+        sqldata = self.sqldata
+        test3 = sqldata[sqldata['TYPE'] == tran_type]
+        test2 = test3[test3['ALT_REF'] == account]
+        test = test2[test2['DATE'] == tran_date]
+        l = len(test)
+        if l == 0:
+            comment = 'Found no transactions on {} .'.format(
+                tran_date.strftime('%Y-%m-%d'), )
+            return (False, 0, comment)
+        else:
+            tn = test[:1]
+            comment = 'Found {} transactions on {}. First was on {}: details {}: for {}.'.format(
+                l, tran_date.strftime('%Y-%m-%d'),
+                list(tn['DATE'])[0].strftime('%Y-%m-%d'),
+                list(tn['DETAILS'])[0],
+                list(tn['AMOUNT'])[0],)
+            return (True, 0, comment)

@@ -23,27 +23,6 @@ class SageImport:
         self.default_bank = default_bank
         self.date = SageImport.today_as_string()
 
-    def check_for_transactions_on_this_day(self, tran_type, account, tran_date):
-        if not hasattr(self, 'sage'):
-            self.sage = Sage()
-        sqldata = self.sage.sqldata
-        test3 = sqldata[sqldata['TYPE'] == tran_type]
-        test2 = test3[test3['ALT_REF'] == account]
-        test = test2[test2['DATE'] == tran_date]
-        l = len(test)
-        if l == 0:
-            comment = 'Found no transactions on {} .'.format(
-                tran_date.strftime('%Y-%m-%d'), )
-            return (False, 0, comment)
-        else:
-            tn = test[:1]
-            comment = 'Found {} transactions on {}. First was on {}: details {}: for {}.'.format(
-                l, tran_date.strftime('%Y-%m-%d'),
-                list(tn['DATE'])[0].strftime('%Y-%m-%d'),
-                list(tn['DETAILS'])[0],
-                list(tn['AMOUNT'])[0],)
-            return (True, 0, comment)
-
     # Row functions
     def write_row(self, tran_type, nominal, reference,
                   date, details, net_amount,
@@ -75,7 +54,9 @@ class SageImport:
                   date, details, net_amount,
                   tax_code, account='', tax_amount=0.0,
                   exchange_rate=1, extra_ref='', user_name = 'Computer', comment = ''):
-        r = self.check_for_transactions_on_this_day(tran_type, nominal, date)
+        if not hasattr(self, 'sage'):
+            self.sage = Sage()
+        r = self.sage.check_for_transactions_on_this_day(tran_type, nominal, date)
         if r[0]:
             #Error There are transactions when there should be none
             self.ran_ok = False
@@ -92,8 +73,10 @@ class SageImport:
                   date, details, net_amount,
                   tax_code, account='', tax_amount=0.0,
                   exchange_rate=1, extra_ref='', user_name = 'H3', comment = ''):
+        if not hasattr(self, 'sage'):
+            self.sage = Sage()
         # Detailed check where check for the exact reference and account.  This will prevent duplication
-        r = self.detailed_check_for_transactions_in_the_month(tran_type, nominal, date, details)
+        r = self.sage.detailed_check_for_transactions_in_the_month(tran_type, nominal, date, details)
         if r[0]:
             #Error There are transactions when there should be none
             self.ran_ok = False
