@@ -2,10 +2,12 @@ import datetime as dt
 import os
 from unipath import Path
 
-class SageImportError(Exception):
-    pass
+from luca import p
 
 from .sage import Sage
+
+class SageImportError(Exception):
+    pass
 
 class SageImport:
 
@@ -43,29 +45,31 @@ class SageImport:
             return (True, 0, comment)
 
     # Row functions
-
     def write_row(self, tran_type, nominal, reference,
                   date, details, net_amount,
                   tax_code, account='', tax_amount=0.0,
                   exchange_rate=1, extra_ref='', user_name = 'PySage50', comment = ''):
-        if user_name == '':
-            user_name = self.user
-        # Don't be tempted to put spaces after comma's. SAGE WILL REJECT IT.
-        self.f.write(tran_type + ',')
-        self.f.write(account + ',')
-        self.f.write(nominal + ',')
-        self.f.write(dt.datetime.strftime(date, '%d/%m/%Y')+',')
-        self.f.write(reference + ',')
-        self.f.write(details + ',')
-        self.f.write('{0:.2f}'.format(net_amount) + ',')
-        self.f.write(tax_code + ',')
-        self.f.write('{0:.2f}'.format(tax_amount)+',') # Tax amount
-        self.f.write('{0:.2f}'.format(exchange_rate)+',')
-        self.f.write(extra_ref+',')
-        self.f.write(user_name)
-        if comment != '':
-            self.f.write(','+comment)
-        self.f.write('\n')
+        if p(net_amount) == p(0) and p(tax_amount) == p(0):
+            pass  # don't write out anything for zero value as not needed
+        else:
+            if user_name == '':
+                user_name = self.user
+            # Don't be tempted to put spaces after comma's. SAGE LINE 50 WILL REJECT IT.
+            self.f.write(tran_type + ',')
+            self.f.write(account + ',')
+            self.f.write(nominal + ',')
+            self.f.write(dt.datetime.strftime(date, '%d/%m/%Y')+',')
+            self.f.write(reference + ',')
+            self.f.write(details + ',')
+            self.f.write('{0:.2f}'.format(net_amount) + ',')
+            self.f.write(tax_code + ',')
+            self.f.write('{0:.2f}'.format(tax_amount)+',') # Tax amount
+            self.f.write('{0:.2f}'.format(exchange_rate)+',')
+            self.f.write(extra_ref+',')
+            self.f.write(user_name)
+            if comment != '':
+                self.f.write(','+comment)
+            self.f.write('\n')
 
     def check_write_row(self, tran_type, nominal,reference,
                   date, details, net_amount,
