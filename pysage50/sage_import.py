@@ -107,11 +107,14 @@ class SageImport:
         The error message means that the file is no long correct.  So none of the entries will be imported"""
         self.f.write(message)
 
-    def start_file(self, name):
+    def start_file(self, name, check_exists=True):
         self.filename = Path(self.home_directory).child(SageImport.today_as_string() + ' ' + name + ' Import.csv')
         if os.path.isfile(self.filename):
-            raise SageImportError('File already exists.  Should probably delete and try again.  File is {}.'.
-                                  format(self.filename))
+            if check_exists:
+                raise SageImportError('File already exists.  Should probably delete and try again.  File is {}.'.
+                                      format(self.filename))
+            else:
+                os.remove(self.filename)
         self.f = open(self.filename, 'w')
         #Write header row
         self.f.write('Type,Account Reference,Nominal A/C Ref,'
