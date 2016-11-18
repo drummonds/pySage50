@@ -94,14 +94,32 @@ class SageImport:
         The error message means that the file is no long correct.  So none of the entries will be imported"""
         self.f.write(message)
 
-    def start_file(self, name, check_exists=True):
-        self.filename = Path(self.home_directory).child(SageImport.today_as_string() + ' ' + name + ' Import.csv')
-        if os.path.isfile(self.filename):
+    def get_file_name(self, name, check_exists=True, modify_name_if_exists=False, suffix='', mod_letter=''):
+        if mod_letter:
+            mod_suffix = '_' + mod_letter
+        else:
+            mod_suffix = ''
+        filename = Path(self.home_directory).child(
+            SageImport.today_as_string() + mod_suffix + ' ' + name + ' Import' + suffix +'.csv')
+        if os.path.isfile(filename):
             if check_exists:
-                raise SageImportError('File already exists.  Should probably delete and try again.  File is {}.'.
-                                      format(self.filename))
+                # Increment mod letter
+                if modify_name_if_exists:
+                    if mod_letter:
+                        mod_letter = chr(ord(mod_letter) + 1)
+                    else:
+                        mod_letter = 'a'
+                    filename = self.get_file_name(name, check_exists, modify_name_if_exists, suffix, mod_letter)
+                else:
+                    raise SageImportError('File already exists.  Should probably delete and try again.  File is {}.'.
+                                          format(filename))
             else:
-                os.remove(self.filename)
+                os.remove(filename)
+        return filename
+
+
+    def start_file(self, name, **kwargs):
+        self.filename = self.get_file_name(name, **kwargs)
         self.f = open(self.filename, 'w')
         #Write header row
         self.f.write('Type,Account Reference,Nominal A/C Ref,'

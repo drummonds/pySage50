@@ -14,7 +14,7 @@ class TestSageImport(unittest.TestCase):
     def cleanup(self, filename, filename_end):
         rootDir = '.'
         for dirName, subdirList, fileList in os.walk(rootDir):
-            if dirName[6:].lower() != r".\.git":
+            if dirName[:6].lower() != r".\.git":
                 print('Found directory: %s' % dirName)
                 for fname in fileList:
                     if fname[:len(filename_end)].lower() == filename_end:
