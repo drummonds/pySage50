@@ -211,10 +211,9 @@ class Sage(metaclass=Singleton):
         # d2 = dt.datetime(2014,12,15)
         en = date +  pd.offsets.MonthEnd(0)
         st = en -  pd.offsets.MonthBegin(1)
-        # test = self.data[(self.data['ACCOUNT_REF'] == account) & (self.data['DATE'] >= st) & (self.data['DATE'] < en)]
-        test2 = self.data[self.data['ACCOUNT_REF'] == int(account)]
-        test1 = test2[self.data['DATE'] >= st]
-        test = test1[self.data['DATE'] <= en]
+        test2 = self.sqldata[self.sqldata['ACCOUNT_REF'] == int(account)]
+        test1 = test2[self.sqldata['DATE'] >= st]
+        test = test1[self.sqldata['DATE'] <= en]
         l = len(test)
         if l == 0:
             comment = 'Found no transactions from {} upto {} (type of start = {}).'.format(
@@ -232,11 +231,10 @@ class Sage(metaclass=Singleton):
     def detailed_check_for_transactions_in_the_month(self, journal_type, account, date, details):
         en = date +  pd.offsets.MonthEnd(0)
         st = en -  pd.offsets.MonthBegin(1)
-        #test = self.data[(self.data['ACCOUNT_REF'] == account) & (self.data['DATE'] >= st) & (self.data['DATE'] < en)]
-        test1 = self.data[self.data['ACCOUNT_REF'] == int(account)]
-        test2 = test1[self.data['DATE'] >= st]
-        test3 = test2[self.data['DATE'] <= en]
-        test = test3[self.data['DETAILS'] == details] # Exact match is ok since looking for machine duplicates
+        test1 = self.sqldata[self.sqldata['ACCOUNT_REF'] == int(account)]
+        test2 = test1[self.sqldata['DATE'] >= st]
+        test3 = test2[self.sqldata['DATE'] <= en]
+        test = test3[self.sqldata['DETAILS'] == details] # Exact match is ok since looking for machine duplicates
         l = len(test)
         if l == 0:
             comment = 'Found no transactions from {} upto {} (type of start = {}).'.format(

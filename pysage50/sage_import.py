@@ -121,7 +121,6 @@ class SageImport:
                 os.remove(filename)
         return filename
 
-
     def start_file(self, name, **kwargs):
         self.filename = self.get_file_name(name, **kwargs)
         self.f = open(self.filename, 'w')
