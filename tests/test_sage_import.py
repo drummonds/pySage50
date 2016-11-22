@@ -5,26 +5,11 @@ import unittest
 
 from luca import p
 
-
+from .file_utils import remove_old_sage_import_files
 from pysage50 import SageImport
 
 
 class TestSageImport(unittest.TestCase):
-
-    def cleanup(self, filename, filename_end):
-        rootDir = '.'
-        for dirName, subdirList, fileList in os.walk(rootDir):
-            if dirName[:6].lower() != r".\.git":
-                print('Found directory: %s' % dirName)
-                for fname in fileList:
-                    if fname[:len(filename_end)].lower() == filename_end:
-                        os.remove(fname)
-                        print('\t%s' % fname)
-        saved_copy = filename + '.last'
-        if os.path.isfile(saved_copy):  # Get rid of all old save copy
-            os.remove(saved_copy)
-        if os.path.isfile(filename):  # Copy the old file so that can inspect after test are run
-            move(filename, saved_copy)
 
     def test_simple_SageImport(self):
         # Todo code test code will fail if run on the end of day so file generated on one day
@@ -46,7 +31,7 @@ class TestSageImport(unittest.TestCase):
                 si.close_file()
             assert os.path.isfile(filename)
         finally:
-            self.cleanup(filename, 'TestSage Import.csv.last')
+            remove_old_sage_import_files(filename, 'TestSage Import.csv.last')
 
     def test_check_SageImportSuccess(self):
         filename = ''
@@ -66,7 +51,7 @@ class TestSageImport(unittest.TestCase):
                 si.close_file()
             assert os.path.isfile(filename)
         finally:
-            self.cleanup(filename, 'TestSage2 Import.csv.last')
+            remove_old_sage_import_files(filename, 'TestSage2 Import.csv.last')
 
     def test_check_SageImportFail(self):
         # TODO
@@ -87,4 +72,4 @@ class TestSageImport(unittest.TestCase):
                 si.close_file()
             assert os.path.isfile(filename)
         finally:
-            self.cleanup(filename, 'TestSage2 Import.csv.last')
+            remove_old_sage_import_files(filename, 'TestSage2 Import.csv.last')

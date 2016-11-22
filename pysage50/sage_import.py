@@ -6,8 +6,10 @@ from luca import p
 
 from .sage import Sage
 
+
 class SageImportError(Exception):
     pass
+
 
 class SageImport:
 
@@ -16,7 +18,7 @@ class SageImport:
         now = dt.datetime.now()
         return dt.datetime.strftime(now, '%Y-%m-%d')
 
-    def __init__(self, home_directory='', user='Auto', default_bank = '1200'):
+    def __init__(self, home_directory='', user='Auto', default_bank='1200'):
         """this is windows based"""
         self.home_directory = home_directory
         self.user = user
@@ -42,7 +44,7 @@ class SageImport:
             self.f.write(details + ',')
             self.f.write('{0:.2f}'.format(net_amount) + ',')
             self.f.write(tax_code + ',')
-            self.f.write('{0:.2f}'.format(tax_amount)+',') # Tax amount
+            self.f.write('{0:.2f}'.format(tax_amount)+',')  # Tax amount
             self.f.write('{0:.2f}'.format(exchange_rate)+',')
             self.f.write(extra_ref+',')
             self.f.write(user_name)
@@ -50,7 +52,7 @@ class SageImport:
                 self.f.write(','+comment)
             self.f.write('\n')
 
-    def check_write_row(self, tran_type, nominal,reference,
+    def check_write_row(self, tran_type, nominal, reference,
                   date, details, net_amount,
                   tax_code, account='', tax_amount=0.0,
                   exchange_rate=1, extra_ref='', user_name = 'Computer', comment = ''):
