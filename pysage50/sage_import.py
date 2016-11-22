@@ -55,7 +55,9 @@ class SageImport:
     def check_write_row(self, tran_type, nominal, reference,
                   date, details, net_amount,
                   tax_code, account='', tax_amount=0.0,
-                  exchange_rate=1, extra_ref='', user_name = 'Computer', comment = ''):
+                  exchange_rate=1, extra_ref='', user_name = 'PySage50', comment = ''):
+        """Identical calling to write_row but checks database before writing out row.  If there is an error
+        makes file corrupt by changing TranType"""
         if not hasattr(self, 'sage'):
             self.sage = Sage()
         r = self.sage.check_for_transactions_on_this_day(tran_type, nominal, date)

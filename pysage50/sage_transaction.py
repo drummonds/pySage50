@@ -28,8 +28,12 @@ class SageTransaction:
         self.sage_sign = 1
         self.transaction_number = -1  # assume not in sage to start
 
-    def write_row(self, sage_import):
-        sage_import.write_row(
+    def write_row(self, sage_import, check=True):
+        if check:
+            func = sage_import.check_write_row
+        else:
+            func = sage_import.write_row
+        func(
             self.tran_type, self.nominal, self.reference,
             self.date, self.details, self.net_amount,
             self.tax_code, self.account, self.tax_amount,
