@@ -82,7 +82,7 @@ def get_dataframe_sage_odbc_query(sql, name):
 sage_all_data = """
 SELECT
     aj.TRAN_NUMBER, aj.TYPE, aj.DATE, nl.ACCOUNT_REF, aj.ACCOUNT_REF as ALT_REF, aj.INV_REF, aj.DETAILS, AJ.TAX_CODE,
-    aj.AMOUNT, aj.FOREIGN_AMOUNT, aj.BANK_FLAG, ah.DATE_BANK_RECONCILED, aj.EXTRA_REF
+    aj.AMOUNT, aj.FOREIGN_AMOUNT, aj.BANK_FLAG, ah.DATE_BANK_RECONCILED, aj.EXTRA_REF, aj.PAID_FLAG, ah.OUTSTANDING
 FROM
 NOMINAL_LEDGER nl, AUDIT_HEADER ah
 LEFT OUTER JOIN AUDIT_JOURNAL aj ON nl.ACCOUNT_REF = aj.NOMINAL_CODE
@@ -221,11 +221,12 @@ class Sage(metaclass=Singleton):
             return (False, 0, comment)
         else:
             tn = test[:1]
+            # TODO make next a function and reuse below
             comment = 'Found {} transactions from {} upto {}. First was on {}: details {}: for {}.'.format(
                 l, st.strftime('%Y-%m-%d'), en.strftime('%Y-%m-%d'),
                 list(tn['DATE'])[0].strftime('%Y-%m-%d'),
                 list(tn['DETAILS'])[0],
-                list(tn['AMOUNT'])[0],)
+                p(list(tn['AMOUNT'])[0]),)
             return (True, 0, comment)
 
     def detailed_check_for_transactions_in_the_month(self, journal_type, account, date, details):
@@ -246,7 +247,7 @@ class Sage(metaclass=Singleton):
                 l, st.strftime('%Y-%m-%d'), en.strftime('%Y-%m-%d'),
                 list(tn['DATE'])[0].strftime('%Y-%m-%d'),
                 list(tn['DETAILS'])[0],
-                list(tn['AMOUNT'])[0],)
+                p(list(tn['AMOUNT'])[0]),)
             return (True, 0, comment)
 
     def check_for_transactions_on_this_day(self, tran_type, account, tran_date):
@@ -267,3 +268,10 @@ class Sage(metaclass=Singleton):
                 list(tn['DETAILS'])[0],
                 list(tn['AMOUNT'])[0],)
             return (True, 0, comment)
+
+    def list_of_accounts_with_unmatched_receipts(self):
+        """This is a list of all the account codes that have invoices paid but not matched off in Sage"""
+        df = self.sqldata
+        accounts_list = list(set(list(df[(df['PAID_FLAG'] == 'N') & (df['TYPE'].isin(['SA']))]['ALT_REF'])))
+        accounts_list.sort()
+        return accounts_list
