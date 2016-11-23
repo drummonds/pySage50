@@ -45,7 +45,7 @@ FROM
     df = pd.read_sql(sql, cnxn)
     return int(df.iloc[0,0])
 
-def get_dataframe_sage_odbc_query(sql, name):
+def get_dataframe_sage_odbc_query(sql, name, update_cache=False):
     """This executes a SQL query if it needs to or pulls in a json file from disk.
     The results of the SQL query are returned as a dataframe.  To decide which to do
     the maximum transaction is compared to the json file."""
@@ -62,7 +62,7 @@ def get_dataframe_sage_odbc_query(sql, name):
     except (FileNotFoundError, ValueError):  # Triggered as open nonexistent file is ok but no data
         max_transaction_stored = 0
     max_transaction_in_sage = get_max_transaction_in_sage(cnxn)
-    if max_transaction_stored == 0 or max_transaction_stored != max_transaction_in_sage:
+    if max_transaction_stored == 0 or max_transaction_stored != max_transaction_in_sage or update_cache:
         df = pd.read_sql(sage_all_data, cnxn)
         # Read fresh data from sage
         # Update files
@@ -105,12 +105,19 @@ class Sage(metaclass=Singleton):
     """Interface to SAGE line 50 account system.
     """
     def  __init__(self, connection_string=''):
+        """ If update_cache then make sure you keep updating from the database"""
         load_dotenv(find_dotenv())
         if connection_string == '':
             connection_string = get_default_connection_string()
         self.sqldata = get_dataframe_sage_odbc_query(sage_all_data, 'SageODBC')
         if self.sqldata['DATE'].dtype == np.object:
             self.sqldata['DATE'] = self.sqldata['DATE'].astype('datetime64')
+
+    def update_cache(self):
+        self.sqldata = get_dataframe_sage_odbc_query(sage_all_data, 'SageODBC', update_cache=True)
+        if self.sqldata['DATE'].dtype == np.object:
+            self.sqldata['DATE'] = self.sqldata['DATE'].astype('datetime64')
+
 
     def using_reference_get(self, i, field, numchars=30, record_type = ['SI']):
         """
