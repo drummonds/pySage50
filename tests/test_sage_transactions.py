@@ -1,7 +1,6 @@
 import unittest
 
-
-from .file_utils import remove_old_sage_import_files
+from file_utils import remove_old_sage_import_files
 from luca import p
 from pysage50 import SageImport, SageTransaction, SageTransactionPurchaseInvoice, SageTransactionPurchaseAdvance
 from pysage50 import SagePurchaseInvoice

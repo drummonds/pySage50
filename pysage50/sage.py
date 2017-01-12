@@ -135,7 +135,7 @@ class Sage(metaclass=Singleton):
         elif field in ['DATE', 'TYPE', 'ACCOUNT_REF', 'ALT_REF', 'INV_REF', 'TAX_CODE',
                        'BANK_FLAG', 'DATE_BANK_RECONCILED']:
             return list(df[field])[0]
-        elif field in ['AMOUNT', 'FOREIGN_AMOUNT']:
+        elif field in ['AMOUNT', 'FOREIGN_AMOUNT', 'OUTSTANDING']:
             return p(df[field].sum())
         elif field == 'GROSS_AMOUNT':
             return p(df['AMOUNT'].sum())
@@ -176,7 +176,6 @@ class Sage(metaclass=Singleton):
 
     def enrich_remittance_doc(self, remittance_doc):
         """Enrich a raw remittance document with data from Sage
-        Remittance doc has a field df which defines all the remittances
         It uses getField which uses 3 predefined columns:
             'Your Ref'  is our invoice number
             'Member Code' is an AIS specfic membership code and defines some exceptions

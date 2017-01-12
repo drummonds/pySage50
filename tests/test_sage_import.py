@@ -5,7 +5,7 @@ import unittest
 
 from luca import p
 
-from .file_utils import remove_old_sage_import_files
+from file_utils import remove_old_sage_import_files
 from pysage50 import SageImport
 
 
