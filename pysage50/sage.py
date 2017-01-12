@@ -133,8 +133,10 @@ class Sage(metaclass=Singleton):
         elif field in ['TRAN_NUMBER']:
             return list(df[:1][field])[0]
         elif field in ['DATE', 'TYPE', 'ACCOUNT_REF', 'ALT_REF', 'INV_REF', 'TAX_CODE',
-                       'BANK_FLAG', 'DATE_BANK_RECONCILED', 'OUTSTANDING']:
+                       'BANK_FLAG', 'DATE_BANK_RECONCILED']:
             return list(df[field])[0]
+        elif field in ['OUTSTANDING']:
+            return p(list(df[field])[0])
         elif field in ['AMOUNT', 'FOREIGN_AMOUNT']:
             return p(df[field].sum())
         elif field == 'GROSS_AMOUNT':
