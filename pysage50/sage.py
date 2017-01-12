@@ -130,12 +130,12 @@ class Sage(metaclass=Singleton):
                           ]
         if len(df) == 0:  # It is an error to look up data where there is none
             raise PySageError('No data found in Audit Header to match invoice {}'.format(i))
-        elif field == 'TRAN_NUMBER':
+        elif field in ['TRAN_NUMBER', 'OUTSTANDING']:
             return list(df[:1][field])[0]
         elif field in ['DATE', 'TYPE', 'ACCOUNT_REF', 'ALT_REF', 'INV_REF', 'TAX_CODE',
                        'BANK_FLAG', 'DATE_BANK_RECONCILED']:
             return list(df[field])[0]
-        elif field in ['AMOUNT', 'FOREIGN_AMOUNT', 'OUTSTANDING']:
+        elif field in ['AMOUNT', 'FOREIGN_AMOUNT']:
             return p(df[field].sum())
         elif field == 'GROSS_AMOUNT':
             return p(df['AMOUNT'].sum())
