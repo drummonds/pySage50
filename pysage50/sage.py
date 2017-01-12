@@ -220,8 +220,8 @@ class Sage(metaclass=Singleton):
         en = date +  pd.offsets.MonthEnd(0)
         st = en -  pd.offsets.MonthBegin(1)
         test2 = self.sqldata[self.sqldata['ACCOUNT_REF'] == int(account)]
-        test1 = test2[self.sqldata['DATE'] >= st]
-        test = test1[self.sqldata['DATE'] <= en]
+        test1 = test2[test2['DATE'] >= st]
+        test = test1[test1['DATE'] <= en]
         l = len(test)
         if l == 0:
             comment = 'Found no transactions from {} upto {} (type of start = {}).'.format(
@@ -241,9 +241,9 @@ class Sage(metaclass=Singleton):
         en = date +  pd.offsets.MonthEnd(0)
         st = en -  pd.offsets.MonthBegin(1)
         test1 = self.sqldata[self.sqldata['ACCOUNT_REF'] == int(account)]
-        test2 = test1[self.sqldata['DATE'] >= st]
-        test3 = test2[self.sqldata['DATE'] <= en]
-        test = test3[self.sqldata['DETAILS'] == details] # Exact match is ok since looking for machine duplicates
+        test2 = test1[test1['DATE'] >= st]
+        test3 = test2[test2['DATE'] <= en]
+        test = test3[test3['DETAILS'] == details] # Exact match is ok since looking for machine duplicates
         l = len(test)
         if l == 0:
             comment = 'Found no transactions from {} upto {} (type of start = {}).'.format(
