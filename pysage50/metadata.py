@@ -7,11 +7,11 @@ Information describing the project.
 package = 'pysage50'
 project = "Python Sage 50 tools"
 project_no_spaces = project.replace(' ', '')
-version = '0.0.33'
+version = '0.0.34'
 description = 'A pythonic interface to Sage Line 50.'
 authors = ['drummonds']
 authors_string = ', '.join(authors)
 emails = ['hum3@drummond.info']
 license = 'MIT'
-copyright = '2016 ' + authors_string
+copyright = '2016-2017 ' + authors_string
 url = 'https://github.com/drummonds/pySage50'

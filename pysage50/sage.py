@@ -224,8 +224,8 @@ class Sage(metaclass=Singleton):
         test = test1[test1['DATE'] <= en]
         l = len(test)
         if l == 0:
-            comment = 'Found no transactions from {} upto {} (type of start = {}).'.format(
-                st.strftime('%Y-%m-%d'), en.strftime('%Y-%m-%d'), type(st), )
+            comment = 'Found no transactions from {} upto {}.'.format(
+                st.strftime('%Y-%m-%d'), en.strftime('%Y-%m-%d'), )
             return (False, 0, comment)
         else:
             tn = test[:1]
@@ -246,8 +246,8 @@ class Sage(metaclass=Singleton):
         test = test3[test3['DETAILS'] == details] # Exact match is ok since looking for machine duplicates
         l = len(test)
         if l == 0:
-            comment = 'Found no transactions from {} upto {} (type of start = {}).'.format(
-                st.strftime('%Y-%m-%d'), en.strftime('%Y-%m-%d'), type(st), )
+            comment = 'Found no transactions from {} upto {} .'.format(
+                st.strftime('%Y-%m-%d'), en.strftime('%Y-%m-%d'), )
             return (False, 0, comment)
         else:
             tn = test[:1]
