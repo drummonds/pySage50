@@ -118,7 +118,6 @@ class Sage(metaclass=Singleton):
         if self.sqldata['DATE'].dtype == np.object:
             self.sqldata['DATE'] = self.sqldata['DATE'].astype('datetime64')
 
-
     def using_reference_get(self, i, field, numchars=30, record_type = ['SI']):
         """
                 Using the invoice number we can look up the field.  The accounting database contains line entries.
@@ -173,7 +172,11 @@ class Sage(metaclass=Singleton):
             if row['Document Type'] in ('Invoice',):
                 result = self.using_reference_get(row['Your Ref'], field, record_type=['SI'])
             if row['Document Type'] in ('Credit Note',):
-                result = self.using_reference_get(row['Your Ref'], field, record_type=['SC'])
+                try:
+                    result = self.using_reference_get(row['Your Ref'], field, record_type=['SC'])
+                except PySageError:  # Perhaps this is a credit note for an invoice because AIS stuffed up eg invoice
+                    # 59088.  So just see if it works as an invoice reference
+                    result = self.using_reference_get(row['Your Ref'], field, record_type=['SI'])
         return result
 
     def enrich_remittance_doc(self, remittance_doc):
@@ -204,7 +207,7 @@ class Sage(metaclass=Singleton):
             ))
         # Check that gross AIS doc values match Sage gross values  TODO remove specific for local installation
         gross_sum_ex_discount = remittance_doc.df[remittance_doc.df['Member Code'] != '4552']['Sage_Gross_Amount'].sum()
-        if (gross != gross_sum_ex_discount):
+        if gross != gross_sum_ex_discount:
             remittance_doc.checked = False
             raise PySageError("Adding up total AIS invoices doesn't equal Sage sum,  {} != {}, types {}, {}".format(
                 gross_sum_ex_discount, gross, type(gross_sum_ex_discount), type(gross)
