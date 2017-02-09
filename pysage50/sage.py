@@ -77,7 +77,7 @@ def get_dataframe_sage_odbc_query(sql, name, cache_upto_date):
             df = pd.read_json(json_file_name)
             # Need to fix those records that are integer but normally stored as strings.  On memoization theses are
             # converted to integers so now need to be converted back to strings to be compatible
-            for fn in ['ACCOUNT_REF', 'INV_REF']:
+            for fn in ['ACCOUNT_REF', 'INV_REF', 'INVOICE_NUMBER']:
                 df[fn] = df[fn].astype('str')
         except (FileNotFoundError, ValueError):  # Triggered as open nonexistent file is ok but no data
             cache_upto_date = False
