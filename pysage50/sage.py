@@ -91,6 +91,15 @@ aj.HEADER_NUMBER = ah.HEADER_NUMBER AND
 aj.DATE > '2000-01-01' AND aj.DELETED_FLAG = 0
 """
 
+sage_all_invoice_lines = """
+SELECT
+  INVOICE_NUMBER, ITEM_NUMBER, DESCRIPTION, TEXT, STOCK_CODE, COMMENT_1, COMMENT_2, UNIT_OF_SALE,
+  QUANTITY, UNIT_PRICE, DISCOUNT_AMOUNT, DISCOUNT_RATE, TAX_CODE, TAX_RATE,
+  NET_AMOUNT, TAX_AMOUNT, GROSS_AMOUNT
+FROM
+INVOICE_ITEM
+"""
+
 
 class Singleton(type):
     instance = None
@@ -109,14 +118,13 @@ class Sage(metaclass=Singleton):
         load_dotenv(find_dotenv())
         if connection_string == '':
             connection_string = get_default_connection_string()
-        self.sqldata = get_dataframe_sage_odbc_query(sage_all_data, 'SageODBC')
-        if self.sqldata['DATE'].dtype == np.object:
-            self.sqldata['DATE'] = self.sqldata['DATE'].astype('datetime64')
+        self.update_cache()
 
     def update_cache(self):
         self.sqldata = get_dataframe_sage_odbc_query(sage_all_data, 'SageODBC', update_cache=True)
         if self.sqldata['DATE'].dtype == np.object:
             self.sqldata['DATE'] = self.sqldata['DATE'].astype('datetime64')
+        self.invoice_lines = get_dataframe_sage_odbc_query(sage_all_invoice_lines, 'SageInvoiceLines')
 
     def using_reference_get(self, i, field, numchars=30, record_type = ['SI']):
         """
