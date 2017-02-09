@@ -17,7 +17,7 @@ class SageTestCase(TestCase):
         load_dotenv(find_dotenv())
 
     def clean_up(self):
-        for fn2 in ['SageODBC_check.json', 'SageODBC.json', 'SageInvoiceLines.json', 'SageInvoiceLines_check.json']:
+        for fn2 in ['SageODBC_check.json', 'SageODBC.json', 'SageInvoiceLines.json']:
             for fn in [fn2, '../' + fn2]:
                 try:
                     remove(fn)

@@ -45,15 +45,14 @@ FROM
     df = pd.read_sql(sql, cnxn)
     return int(df.iloc[0,0])
 
-def get_dataframe_sage_odbc_query(sql, name, update_cache=False):
-    """This executes a SQL query if it needs to or pulls in a json file from disk.
-    The results of the SQL query are returned as a dataframe.  To decide which to do
-    the maximum transaction is compared to the json file."""
+def check_cache_upto_date():
+    """This looks at the highest transaction and sees if a newer one is in the database.  It is not perfect
+    as only checks the transactions and donesn't notice if a file has been edited wihtout adding new transactions.
+    """
     connection_string = get_default_connection_string()
     cnxn = pyodbc.connect(connection_string)
     # Get the maximum transaction number
-    json_check_file_name = name + '_check.json'
-    json_file_name = name + '.json'
+    json_check_file_name = 'SageODBC_check.json'
     # Read it from file
     try:
         with open(json_check_file_name) as f:
@@ -62,20 +61,31 @@ def get_dataframe_sage_odbc_query(sql, name, update_cache=False):
     except (FileNotFoundError, ValueError):  # Triggered as open nonexistent file is ok but no data
         max_transaction_stored = 0
     max_transaction_in_sage = get_max_transaction_in_sage(cnxn)
-    if max_transaction_stored == 0 or max_transaction_stored != max_transaction_in_sage or update_cache:
-        df = pd.read_sql(sage_all_data, cnxn)
+    update_cache = (max_transaction_stored == 0) or max_transaction_stored != max_transaction_in_sage or update_cache
+    return update_cache
+
+
+def get_dataframe_sage_odbc_query(sql, name, cache_upto_date):
+    """This executes a SQL query if it needs to or pulls in a json file from disk.
+    The results of the SQL query are returned as a dataframe.  To decide which to do
+    the maximum transaction is compared to the json file."""
+    connection_string = get_default_connection_string()
+    cnxn = pyodbc.connect(connection_string)
+    json_file_name = name + '.json'
+    if cache_upto_date:  # read memoised data
+        try:
+            df = pd.read_json(json_file_name)
+            # Need to fix those records that are integer but normally stored as strings.  On memoization theses are
+            # converted to integers so now need to be converted back to strings to be compatible
+            for fn in ['ACCOUNT_REF', 'INV_REF']:
+                df[fn] = df[fn].astype('str')
+        except (FileNotFoundError, ValueError):  # Triggered as open nonexistent file is ok but no data
+            cache_upto_date = False
+    if not cache_upto_date:  # May have been original but no data file
         # Read fresh data from sage
+        df = pd.read_sql(sql, cnxn)
         # Update files
         df.to_json(json_file_name)
-        data = {'max_transaction_stored': max_transaction_in_sage}
-        with open(json_check_file_name, 'w') as f:
-            json.dump(data, f)
-    else:  # read memoised data
-        df = pd.read_json(json_file_name)
-        # Need to fix those records that are integer but normally stored as strings.  On memoization theses are
-        # converted to integers so now need to be converted back to strings to be compatible
-        for fn in ['ACCOUNT_REF', 'INV_REF']:
-            df[fn] = df[fn].astype('str')
     return df
 
 
@@ -121,10 +131,18 @@ class Sage(metaclass=Singleton):
         self.update_cache()
 
     def update_cache(self):
-        self.sqldata = get_dataframe_sage_odbc_query(sage_all_data, 'SageODBC', update_cache=True)
+        self.load_data(update_cache=True)
+
+    def load_data(self, update_cache=False):
+        if not update_cache:
+            cache_is_upto_date = check_cache_upto_date()
+        else:
+            cache_is_upto_date = False
+        self.sqldata = get_dataframe_sage_odbc_query(sage_all_data, 'SageODBC', cache_is_upto_date)
         if self.sqldata['DATE'].dtype == np.object:
             self.sqldata['DATE'] = self.sqldata['DATE'].astype('datetime64')
-        self.invoice_lines = get_dataframe_sage_odbc_query(sage_all_invoice_lines, 'SageInvoiceLines')
+        self.invoice_lines = get_dataframe_sage_odbc_query(sage_all_invoice_lines, 'SageInvoiceLines',
+                                                           cache_is_upto_date)
 
     def using_reference_get(self, i, field, numchars=30, record_type = ['SI']):
         """
