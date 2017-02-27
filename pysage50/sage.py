@@ -114,6 +114,14 @@ FROM
 INVOICE_ITEM
 """
 
+sage_all_invoices = """
+SELECT
+  INVOICE_NUMBER, DEL_NAME, DEL_ADDRESS_1, DEL_ADDRESS_2, DEL_ADDRESS_3, DEL_ADDRESS_4, DEL_ADDRESS_5,
+  CARR_NET, CARR_TAX, CARR_GROSS, SETTLEMENT_DUE_DAYS
+FROM
+INVOICE
+"""
+
 
 class Singleton(type):
     instance = None
@@ -145,6 +153,8 @@ class Sage(metaclass=Singleton):
         self.sqldata = get_dataframe_sage_odbc_query(sage_all_data, 'SageODBC', cache_is_upto_date)
         if self.sqldata['DATE'].dtype == np.object:
             self.sqldata['DATE'] = self.sqldata['DATE'].astype('datetime64')
+        self.invoices = get_dataframe_sage_odbc_query(sage_all_invoices, 'SageInvoices',
+                                                      cache_is_upto_date)
         self.invoice_lines = get_dataframe_sage_odbc_query(sage_all_invoice_lines, 'SageInvoiceLines',
                                                            cache_is_upto_date)
 
